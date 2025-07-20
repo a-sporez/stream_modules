@@ -1,0 +1,543 @@
+the game we are making is called "underscore"
+
+underscore is a turn based rpg which uses mechanics more in common with board games and card games than most.
+Underscore uses as little Random Number Generation as possible, airing instead in favor of strategic/tactical play.
+underscore uses lower numbers rather than large ones, accordingly, in order to give players a sense of 'scarcity'
+
+this is the basic game loop:
+
+
+1.	START_SCREEN
+
+	CHOICES:
+		- New Game		Sends players to the CHARACTER_SELECTION Screen to pick a starting build
+		- Load Game		Offers Players the ability to continue a game they closed before completing
+		- Options		Allows players to change basic settings of the game
+		- History		Shows Players a list of their own previous runs
+
+Here is a quick Mock Up of the Title Screen:
+
+
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|		  ▄      ▄   ██▄   ▄███▄   █▄▄▄▄   ▄▄▄▄▄   ▄█▄    ████▄ █▄▄▄▄ ▄███▄       |
+ 	|		   █      █  █  █  █▀   ▀  █  ▄▀  █     ▀▄ █▀ ▀▄  █   █ █  ▄▀ █▀   ▀      |
+    |       █   █ ██   █ █   █ ██▄▄    █▀▀▌ ▄  ▀▀▀▀▄   █   ▀  █   █ █▀▀▌  ██▄▄        |
+    |       █   █ █ █  █ █  █  █▄   ▄▀ █  █  ▀▄▄▄▄▀    █▄  ▄▀ ▀████ █  █  █▄   ▄▀     |
+    |       █▄ ▄█ █  █ █ ███▀  ▀███▀     █             ▀███▀          █   ▀███▀       |
+    |        ▀▀▀  █   ██                ▀                            ▀				  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|							1 )		NEW GAME									  |
+	|																				  |
+	|							2 )		LOAD GAME									  |
+	|																				  |
+	|							3 )	    OPTIONS										  |
+	|																				  |
+	|							4 )		HISTORY										  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|																				  |
+	|	THROW ANOTHER BODY ON THE STOCKPILE OF HISTORY								  |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+
+
+2.	CHARACTER_SELECTION
+
+	CHOICES:
+		- Mason		( Water / Stone )		A Robust and Flexable Build with Status Management & Banked Move Synergies
+		- Cultivist	( Fire / Plant )		A Boom & Bust Build with a focus on Variable Declaration & Risk Taking
+		- Itinerant ( Force / Thunder )		A Complicated Build with a Strong Focus on Utility Moves & Time Synergies
+		- Bastard	( Vital / MISC )		A Violent and Dynamic Build which starts more randomized than others
+
+The following is a quick mockup of the character selection screen
+pressing the number keys pulls up ascii art of the character, their 2 elements, and their lore description
+q returns to the title screen, enter brings the player forward into the precombat loading screen
+
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|																				  |
+	|																				  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|						   ###########################							  |
+	|																				  |
+	|																				  |
+	|					ELEMENT_ONE					  ELEMENT_TWO					  |
+	|																				  |
+	|																				  |
+	|			THE FOLLOWING IS A DESCRIPTION OF THE CHARACTER IN LORE TERMS		  |
+	|																				  |
+	|																				  |
+	|	1 )		MASON																  |
+	|																				  |
+	|	2 )		CULTIVIST															  |
+	|											  q )	RETURN TO MENU				  |
+	|	3 )	    ITINERANT															  |
+	|										  enter )	CONFIRM SELECTION			  |
+	|	4 )		BASTARD																  |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+
+
+3.	PRECOMBAT_LOADING
+
+	On this screen, Players are presented with a screen which displays all information about their build
+	This screen allows players a moment to think over their character and decide to continue or take a break
+	This is also when the game loads up an encounter for the player according to these stats.
+	
+	Players start with a 'level' integer of 1 and gain 1 more level each time they finish a fight successfully
+	The game queries for an encounter of the same level based on this level.
+	
+	in additon to increasing their level, players also are able to upgrade their characters at the end of combat.
+	at this point, players are given one of two choices- receving a 'blessing', or learning an enemies move.
+	players who take on a blessing increase a player integer called 'blessing_burden' by a number relative to
+	the relative rarity and power level of that blessing (as low as 0, as high as + 5 burden)
+	
+	the reason i am saying this here is to let you know that when loading an encounter, 
+	these are the two integers that choose which encounter will be loaded.
+	players with high blessing_burden face more 'elite encounters'
+	
+	the way this works:
+		first, a random integer 'elite_risk' between 1 and 10 is called with randint
+			if blessing_burden < elite_risk:
+				player faces a normal encounter
+			elif blessing_burden == elite_risk:
+				player faces a fallen player
+			elif blessing_burden > elite_risk:
+				player faces an elite encounter
+
+	this will not be explicitly told to the player, it's a little bit of hidden logic.
+	they will know when an encounter is an elite encounter by the uniqueness of the moves and design.
+	elite encounters are also far stronger than standard enemies and will test players ability to play well.
+
+	CHOICES:
+		- Continue		Sends Players to the COMBAT Screen to enter combat
+		- Save Game		Saves the Current Player Build as a json to be loaded later
+
+Here's a quick mock up of the precombat screen. as you can see, there are letters 
+players can press in order to get a printed description of a move or blessing.
+when this is done, a box is superimposed over the center of the screen,
+replacing whatever characters would typically be in that spot.
+
+i'll include an example of that happening right below as well for posterity.
+
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|	 ###########################	+--- ACTIVE MOVES -----------------------+	  |
+	|	 ###########################	|	 1 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|	 2 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	| 	 3 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    4 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	+--- BANKED MOVES -----------------------+	  |
+	|	 ###########################	|	 5 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    6 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	+----------------------------------------+	  |
+	|	 ###########################												  |
+	|	 ###########################	+--- BLESSINGS --------------------------+    |
+	|									|										 |	  |
+	|		MAX_HP:			   10		|	 a )	name of blessing			 |	  |
+	|		LEVEL:				1		|	 b )	name of blessing			 |	  |
+	|		ELITES SLAIN:		0		|	 c )	name of blessing			 |	  |
+	|									|	 d )	name of blessing			 |	  |
+	|		ATTUNED_TO:					|	 e )	name of blessing			 |	  |
+	|	  W  S  F  P  V  O  T			|	 f )	name of blessing			 |	  |
+	|	  #  #  #  #  #  #  #			|	 g )    name of blessing			 |	  |
+	|									|										 |	  |
+	|		AFFLICTED_WITH:				|										 |	  |
+	|	  B   W   D   R   S   Q			|										 |	  |
+	|	  #   #   #   #   #   #			|										 |	  |
+	|	    A   X   Z   C   S   T		|										 |	  |
+	|		#   #   #   #   #   #		+----------------------------------------+	  |
+	|																				  |
+	|													enter )		 CONTINUE	      |
+	|														q )		SAVE & QUIT		  |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+
+The following is an example of a move being selected, the Move Selected is 'ROLL TIDE'
+as you can see, the info that was in the lines before it was called is obscured by negative space
+in addition to that, we are now showing the close description option, which we only do while showing one.
+
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|	 ###########################	+--- ACTIVE MOVES -----------------------+	  |
+	|	 ###########################	|	 1 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|	 2 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	| 	 3 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    4 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	+--- BANKED MOVES -----------------------+	  |
+	|	 ###########################	|	 5 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    6 )	name of move	( ELEMENT )	 |	  |
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|		ROLL TIDE										( WATER ) ( ATTACK )	  |
+	|																				  |
+	|																				  |
+	|		Caster Attunes to Water													  |
+	|		Deals 2 Water Damage to Target											  |
+	|																				  |
+	|																				  |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+	|									|										 |	  |
+	|		AFFLICTED_WITH:				|										 |	  |
+	|	  B   W   D   R   S   Q			|										 |	  |
+	|	  #   #   #   #   #   #			|										 |	  |
+	|	    A   X   Z   C   S   T		|										 |	  |
+	|		#   #   #   #   #   #		+----------------------------------------+	  |
+	|																				  |
+	|			                       					enter )		 CONTINUE	      |
+	|		esc )	CLOSE DESCRIPTION						q )		SAVE & QUIT		  |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+
+
+4.	COMBAT
+
+	Combat in this game follows an internal loop unto itself.
+	The phases of this loop are as such:
+
+		1.	DECISION			This is when the player chooses their move and declares targets
+		2.	TURN_ORDERING		This is when the game uses priority + speed calculation to decide execution order
+		3.	EXECUTION			This is when moves decided during the first step are executed- this happens in steps:
+				  
+				I.		Pre-Action Status Effects (checked in the following order)
+
+					These statuses each check if their turn value is above 0, 
+					and then execute their effect only if the value on them is not 0
+
+					- Regen		Character gains X Life, equal to their 'regen[turns]' value, +1 if attuned to fire
+					- Burn		Character takes X Fire Damage, equal to their 'burn[turns]' value
+					- Decay		Character takes 1 Force Damage (if afflicted), and then gains 1 curse_threat
+								curse_threat represents the chance out of 10 of becoming cursed when hit by
+								curse afflicting moves. some curse afflicting moves modify that variable themselves,
+								but decay has the effect of increasing the curse_threat variable also as a second effect
+					- Wound		Checks for 50% or less health and wound-immunity as stated above; if conditions are met:
+								character takes 1 Vital Damage X Times, where X is how many wounds they have
+								character loses all wounds, character's wound[immune] bool switches to true
+								Otherwise, this checks whether the character is both wound immune and has 100% health
+								if so, that character loses wound immunity.
+				 
+				II.		Action-Disqualifying Status Effects (checked in this order)
+	
+					These statuses each check if their turn value is above 0, 
+					and then execute their effect only if the value on them is not 0			
+
+					- Stun		if chosen move is an attack, character skips to the 'variables adjust' phase
+					- Anger		if chosen move is a utility, character skips to the 'variables adjust' phase
+					- Sleep		if chosen move is not sleep-proof, character skips to the 'variables adjust' phase
+					
+				III.	Bound Check
+
+					Game checks if the chosen move is contained in the characters list of 'bound' moves
+					If so, character skips to the 'variables adjust' phase
+
+				IV.		Declarations Check
+
+					Game Checks if the chosen move is contained in the dict of currently active 'declared' moves
+					If so, the function associated with that declaration is called and the effects occur at this time.
+					Some declarations will turn themselves off on occurance, some will persist, many will deal damage
+					because of this, it is important that this happen here.
+
+				V.		Move Function Call
+
+					This is when the functions associated with the chosen move are called
+					Moves occur in the order they are in the list found on the object
+				
+				VI.		Variables Adjust
+
+				 	Elements with a turns value above 0 increase by 1
+					Statuses with a turns value above 0 decrease by 1, with the exception of 'wound'
+					Player's Decision is appended to their their turn_history dict in the off chance they lose the round
+
+				VII.	Turn Ends
+
+					This character's turn is now done executing.
+					The second character's turn will now be executed.
+
+		4.	#---- Other character's turn executes, following the same steps detailed above ---#
+
+		5.	PRIORITY EXCHANGE
+
+			if the player has priority then he loses it and the opponent gains it
+			if instead the opponent had priority, the player now has priority and the opponent loses it
+
+		6.	END OF LOOP
+
+			at this point, we return to the start of the loop, the 'DECISION' step
+			this loop perpetuates until either the player or the opponent fall to 0 life
+			
+
+Below I have made a mockup of how I want the game screen to look during combat.
+Below that, still, i have included the ASCII ART for a variety of events which print to the center area
+I made the borders with basic keyboard characters, but ideally we would use more aesthetic box characters
+for the attunes and statuses section, i have used the letters for the words themselves to represent the spots
+where the actual characters associated with those elements will go.
+for the sake of clarity, those characters are as follows:
+
+STYLE_REF: dict = {
+    'element': {
+        'water':    { 'color':   4, 'icon': '🌊' },
+        'stone':    { 'color': 136, 'icon': '🪨' },
+        'fire':     { 'color': 196, 'icon': '🔥' },
+        'plant':    { 'color': 112, 'icon': '🌿' },
+        'vital':    { 'color': 198, 'icon': '❤️' },
+        'force':    { 'color':  36, 'icon': '💨' },
+        'thunder':  { 'color': 184, 'icon': '⚡' },
+        },
+    'status': {
+        'burn':     { 'color': 167, 'icon': '🔥' },
+        'wound':    { 'color': 168, 'icon': '🩸' },
+        'decay':    { 'color':  30, 'icon': '💀' },
+        'regen':    { 'color':  70, 'icon': '✨' },
+        'slow':     { 'color': 172, 'icon': '🐌'},
+        'quick':    { 'color': 229, 'icon': '⚡' },
+        'angry':    { 'color': 174, 'icon': '😡' },
+        'curse':    { 'color':  56, 'icon': '😈' },
+        'stun':     { 'color': 184, 'icon': '😵' },
+        'sleep':    { 'color': 107, 'icon': '💤' },
+        'tough':    { 'color':  94, 'icon': '🛡️'},
+        'strong':   { 'color':   1, 'icon': '💪' },
+        }
+    }
+
+
+COMBAT SCREEN::
+
+
+	+---------------------------------------------------------------------------------+
+	| +-----------------------------+												  |
+	| |	ENEMY_NAME	   HP / MAX_HP	|	<-- This is the Enemy StatBox				  |
+	| |				   ( PRIORITY )	|	<-- Priority is 'yellow' when they have it	  |
+	| |	 A  T  T  U  N  E  S		|	<-- Elements show color when attuned_to > 0   |
+	| |	 #  #  #  #  #  #  #		|	<-- When hovering over an attack, this will show a + or - based on element relations
+	| |	 S T A T U S E S - - - -	|	<-- Statuses Show Color when turns > 0		  |
+	| |	 # # # # # # # # # # # #	|	<-- Turns left of the status are shown under their colored representation above
+	| +-----------------------------+												  |
+	+---------------------------------------------------------------------------------+
+	|				THIS IS WHERE IMPORTANT GAME INFO WILL BE DISPLAYED				  |
+	|				THINGS LIKE ASKING THE PLAYER TO DECLARE A VARIABLE				  |
+	|				OR HIGHLY IMPACTFUL COMBAT EVENTS THAT STAND OUT				  |
+	|				SUCH AS SKIPPED TURNS, PLAYER DEATH, ENEMY DEATH, ETC		      |
+	|				THIS INFO IS PRESENTED VIA 5 LINE TALL ASCII ART				  |
+	|				AND ACCOMPANYING OPTIONS AS SHOWN BELOW							  |
+	|	IMPORTANT: THIS WINDOW'S FRAME GOES AWAY WHILE ACTIONS ARE EXECUTING		  |
+	+---------------------------------------------------------------------------------+
+	|												+-------------------------------+ |
+	|	Character HP is green at 100%				| PLAYER_NAME	   HP / MAX_HP	| |
+	|					yellow at 70%				|				   ( PRIORITY )	| |
+	|					red at 50%					|  A  T  T  U  N  E  S			| |
+	|	On Players #, turns_attuned is shown -->	|  #  #  #  #  #  #  #			| |
+	|	Attunes that are privately held				|  S T A T U S E S - - - -		| |
+	|	Show their letter in white bg, black fg		|  # # # # # # # # # # # #		| |
+	|												+-------------------------------+ |
+	+----------------------------------------------------------+----------------------+
+	|  1 ) (icon) ACTIVE_MOVE[0]	(description)			   |  5 ) Player Info     |	<-- this is the player option panel
+	|  2 ) (icon) ACTIVE_MOVE[1]	(description)			   |  6 ) Enemy Info      |		players have a variety of options
+	|  3 ) (icon) ACTIVE_MOVE[2]	(description)			   |  7 ) Declared Pool	  |		they can choose from
+	|  4 ) (icon) ACTIVE_MOVE[3]	(description)			   |  8 ) Other Actions	  |		
+	+----------------------------------------------------------+----------------------+		nums 1-4 choose moves for the turn
+																							5 opens a page of exhaustive current player info (banked moves, current blessings, etc)
+																							6 opens a page of public info about the opponent (non-public info will be censored)
+																							7 opens a page listing the current standing declarations (variables called per special moves)
+																							8 opens a page with the following actions:	1. give up
+"""
+ ▗▄▄▖▗▖ ▗▖ ▗▄▖  ▗▄▖  ▗▄▄▖▗▄▄▄▖    ▗▄▄▄▖▗▄▖ ▗▄▄▖  ▗▄▄▖▗▄▄▄▖▗▄▄▄▖
+▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌         █ ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌     █  
+▐▌   ▐▛▀▜▌▐▌ ▐▌▐▌ ▐▌ ▝▀▚▖▐▛▀▀▘      █ ▐▛▀▜▌▐▛▀▚▖▐▌▝▜▌▐▛▀▀▘  █  
+▝▚▄▄▖▐▌ ▐▌▝▚▄▞▘▝▚▄▞▘▗▄▄▞▘▐▙▄▄▖      █ ▐▌ ▐▌▐▌ ▐▌▝▚▄▞▘▐▙▄▄▖  █  
+
+		( 1 ):	OPPONENT			( 2 ):	YOURSELF
+
+"""
+
+"""
+▗▄▄▄ ▗▄▄▄▖ ▗▄▄▖▗▖    ▗▄▖ ▗▄▄▖ ▗▄▄▄▖    ▗▄▄▄▖▗▖   ▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖
+▐▌  █▐▌   ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌       ▐▌   ▐▌   ▐▌   ▐▛▚▞▜▌▐▌   ▐▛▚▖▐▌  █  
+▐▌  █▐▛▀▀▘▐▌   ▐▌   ▐▛▀▜▌▐▛▀▚▖▐▛▀▀▘    ▐▛▀▀▘▐▌   ▐▛▀▀▘▐▌  ▐▌▐▛▀▀▘▐▌ ▝▜▌  █  
+▐▙▄▄▀▐▙▄▄▖▝▚▄▄▖▐▙▄▄▖▐▌ ▐▌▐▌ ▐▌▐▙▄▄▖    ▐▙▄▄▖▐▙▄▄▖▐▙▄▄▖▐▌  ▐▌▐▙▄▄▖▐▌  ▐▌  █  
+
+		ELEMENT_NAME:_________________________
+
+"""
+
+"""
+▗▄▄▄ ▗▄▄▄▖ ▗▄▄▖▗▖    ▗▄▖ ▗▄▄▖ ▗▄▄▄▖    ▗▖  ▗▖ ▗▄▖ ▗▖  ▗▖▗▄▄▄▖
+▐▌  █▐▌   ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌       ▐▛▚▞▜▌▐▌ ▐▌▐▌  ▐▌▐▌   
+▐▌  █▐▛▀▀▘▐▌   ▐▌   ▐▛▀▜▌▐▛▀▚▖▐▛▀▀▘    ▐▌  ▐▌▐▌ ▐▌▐▌  ▐▌▐▛▀▀▘
+▐▙▄▄▀▐▙▄▄▖▝▚▄▄▖▐▙▄▄▖▐▌ ▐▌▐▌ ▐▌▐▙▄▄▖    ▐▌  ▐▌▝▚▄▞▘ ▝▚▞▘ ▐▙▄▄▖
+
+		MOVE_NAME:	_________________________
+
+"""
+
+"""
+▗▄▄▄ ▗▄▄▄▖ ▗▄▄▖▗▖    ▗▄▖ ▗▄▄▖ ▗▄▄▄▖     ▗▄▄▖▗▄▄▄▖▗▄▖▗▄▄▄▖▗▖ ▗▖ ▗▄▄▖
+▐▌  █▐▌   ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌       ▐▌     █ ▐▌ ▐▌ █  ▐▌ ▐▌▐▌   
+▐▌  █▐▛▀▀▘▐▌   ▐▌   ▐▛▀▜▌▐▛▀▚▖▐▛▀▀▘     ▝▀▚▖  █ ▐▛▀▜▌ █  ▐▌ ▐▌ ▝▀▚▖
+▐▙▄▄▀▐▙▄▄▖▝▚▄▄▖▐▙▄▄▖▐▌ ▐▌▐▌ ▐▌▐▙▄▄▖    ▗▄▄▞▘  █ ▐▌ ▐▌ █  ▝▚▄▞▘▗▄▄▞▘
+
+		STATUS_NAME:_________________________
+
+"""
+
+"""
+▗▄▄▄ ▗▄▄▄▖ ▗▄▄▖▗▖    ▗▄▖ ▗▄▄▖ ▗▄▄▄▖    ▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖▗▄▄▄▖ ▗▄▄▖▗▄▄▄▖▗▄▄▖ 
+▐▌  █▐▌   ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌         █  ▐▛▚▖▐▌  █  ▐▌   ▐▌   ▐▌   ▐▌ ▐▌
+▐▌  █▐▛▀▀▘▐▌   ▐▌   ▐▛▀▜▌▐▛▀▚▖▐▛▀▀▘      █  ▐▌ ▝▜▌  █  ▐▛▀▀▘▐▌▝▜▌▐▛▀▀▘▐▛▀▚▖
+▐▙▄▄▀▐▙▄▄▖▝▚▄▄▖▐▙▄▄▖▐▌ ▐▌▐▌ ▐▌▐▙▄▄▖    ▗▄█▄▖▐▌  ▐▌  █  ▐▙▄▄▖▝▚▄▞▘▐▙▄▄▖▐▌ ▐▌
+
+		INTEGER:	_________________________
+
+"""
+
+"""
+▗▄▄▄▖▗▖ ▗▖▗▄▄▖ ▗▖  ▗▖     ▗▄▄▖▗▖ ▗▖▗▄▄▄▖▗▄▄▖ ▗▄▄▖ ▗▄▄▄▖▗▄▄▄ 
+  █  ▐▌ ▐▌▐▌ ▐▌▐▛▚▖▐▌    ▐▌   ▐▌▗▞▘  █  ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌  █
+  █  ▐▌ ▐▌▐▛▀▚▖▐▌ ▝▜▌     ▝▀▚▖▐▛▚▖   █  ▐▛▀▘ ▐▛▀▘ ▐▛▀▀▘▐▌  █
+  █  ▝▚▄▞▘▐▌ ▐▌▐▌  ▐▌    ▗▄▄▞▘▐▌ ▐▌▗▄█▄▖▐▌   ▐▌   ▐▙▄▄▖▐▙▄▄▀
+
+		* Reason for Turn Being Skipped Prints Here *
+
+"""
+
+"""
+ ▗▄▄▖ ▗▄▖ ▗▖  ▗▖▗▄▄▄▖     ▗▄▖ ▗▖  ▗▖▗▄▄▄▖▗▄▄▖ 
+▐▌   ▐▌ ▐▌▐▛▚▞▜▌▐▌       ▐▌ ▐▌▐▌  ▐▌▐▌   ▐▌ ▐▌
+▐▌▝▜▌▐▛▀▜▌▐▌  ▐▌▐▛▀▀▘    ▐▌ ▐▌▐▌  ▐▌▐▛▀▀▘▐▛▀▚▖
+▝▚▄▞▘▐▌ ▐▌▐▌  ▐▌▐▙▄▄▖    ▝▚▄▞▘ ▝▚▞▘ ▐▙▄▄▖▐▌ ▐▌
+
+		* PLAYER_NAME DIED AFTER X ROUNDS * 
+
+"""
+
+"""
+▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖▗▖  ▗▖▗▖  ▗▖     ▗▄▄▖▗▖    ▗▄▖ ▗▄▄▄▖▗▖  ▗▖
+▐▌   ▐▛▚▖▐▌▐▌   ▐▛▚▞▜▌ ▝▚▞▘     ▐▌   ▐▌   ▐▌ ▐▌  █  ▐▛▚▖▐▌
+▐▛▀▀▘▐▌ ▝▜▌▐▛▀▀▘▐▌  ▐▌  ▐▌       ▝▀▚▖▐▌   ▐▛▀▜▌  █  ▐▌ ▝▜▌
+▐▙▄▄▖▐▌  ▐▌▐▙▄▄▖▐▌  ▐▌  ▐▌      ▗▄▄▞▘▐▙▄▄▖▐▌ ▐▌▗▄█▄▖▐▌  ▐▌
+
+		* ENEMY_NAME WAS DEFEATED AFTER X TURNS *
+
+"""
+
+"""
+▗▄▄▄▖▗▖   ▗▄▄▄▖▗▄▄▄▖▗▄▄▄▖     ▗▄▄▖▗▖    ▗▄▖ ▗▄▄▄▖▗▖  ▗▖
+▐▌   ▐▌     █    █  ▐▌       ▐▌   ▐▌   ▐▌ ▐▌  █  ▐▛▚▖▐▌
+▐▛▀▀▘▐▌     █    █  ▐▛▀▀▘     ▝▀▚▖▐▌   ▐▛▀▜▌  █  ▐▌ ▝▜▌
+▐▙▄▄▖▐▙▄▄▖▗▄█▄▖  █  ▐▙▄▄▖    ▗▄▄▞▘▐▙▄▄▖▐▌ ▐▌▗▄█▄▖▐▌  ▐▌
+
+		* ELITE_NAME WAS DEFEATED AFTER X TURNS *
+
+""
+
+As stated before, there is the ability to pull up a screen very similar to the one found in the precombat
+the following is that screen- notice the very slight differences at play- 
+the use of the current HP in addition to the max HP,
+the use of current variables rather than a default 0 on the attune and afflicted status reads,
+the use of a return to combat option over the other options
+this is what it looks like when we look at either the character or enemy info
+just know that, the moves, attunement, and blessings of our opponents default to private until made public
+when these are private, a generic censored character is used instead of actual values
+
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|	 ###########################	+--- ACTIVE MOVES -----------------------+	  |
+	|	 ###########################	|	 1 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|	 2 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	| 	 3 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    4 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	+--- BANKED MOVES -----------------------+	  |
+	|	 ###########################	|	 5 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    6 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	+----------------------------------------+	  |
+	|	 ###########################												  |
+	|	 ###########################	+--- BLESSINGS --------------------------+    |
+	|									|										 |	  |
+	|		HP:			10	/  10		|	 a )	name of blessing			 |	  |
+	|		LEVEL:				1		|	 b )	name of blessing			 |	  |
+	|		ELITES SLAIN:		0		|	 c )	name of blessing			 |	  |
+	|									|	 d )	name of blessing			 |	  |
+	|		ATTUNED_TO:					|	 e )	name of blessing			 |	  |
+	|	  W  S  F  P  V  O  T			|	 f )	name of blessing			 |	  |
+	|	  #  #  #  #  #  #  #			|	 g )    name of blessing			 |	  |
+	|									|										 |	  |
+	|		AFFLICTED_WITH:				|										 |	  |
+	|	  B   W   D   R   S   Q			|										 |	  |
+	|	  #   #   #   #   #   #			|										 |	  |
+	|	    A   X   Z   C   S   T		|										 |	  |
+	|		#   #   #   #   #   #		+----------------------------------------+	  |
+	|																				  |
+	|																			      |
+	|														q )	   RETURN TO COMBAT   |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+
+as before, we can pull up descriptions of items that are public.
+because of this, the same interupt strip exists in this scene, as depicted below
+
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|	 ###########################	+--- ACTIVE MOVES -----------------------+	  |
+	|	 ###########################	|	 1 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|	 2 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	| 	 3 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    4 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	+--- BANKED MOVES -----------------------+	  |
+	|	 ###########################	|	 5 )	name of move	( ELEMENT )	 |	  |
+	|	 ###########################	|    6 )	name of move	( ELEMENT )	 |	  |
+	+---------------------------------------------------------------------------------+
+	|																				  |
+	|		ROLL TIDE										( WATER ) ( ATTACK )	  |
+	|																				  |
+	|																				  |
+	|		Caster Attunes to Water													  |
+	|		Deals 2 Water Damage to Target											  |
+	|																				  |
+	|																				  |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+	|									|										 |	  |
+	|		AFFLICTED_WITH:				|										 |	  |
+	|	  B   W   D   R   S   Q			|										 |	  |
+	|	  #   #   #   #   #   #			|										 |	  |
+	|	    A   X   Z   C   S   T		|										 |	  |
+	|		#   #   #   #   #   #		+----------------------------------------+	  |
+	|																				  |
+	|																			      |
+	|		esc )	CLOSE DESCRIPTION						q )	   RETURN TO COMBAT	  |
+	|																				  |
+	+---------------------------------------------------------------------------------+
+
+
+PLAYER UPGRADES
+
+when players win a combat, the time has then come for them to choose an upgrade
+there are two upgrade choices in this game- either you can recieve on of a variety of blessings,
+or you can choose to learn one of the moves the enemy you just defeated knows
+
+since blessings are very powerful, there is a limit to when and how often players can get them
+players can only choose to recieve a blessing as their upgrade when their elites_slain is
+equal to or greater than the number of blessings they currently have.
+in order to continue getting blessings, they will need to defeat another elite enemy
+
+
